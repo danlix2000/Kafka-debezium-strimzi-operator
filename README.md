@@ -24,11 +24,12 @@ So we used
 
 In this environemnt
 
-taint key is  "sku".
-taint value is "generalvm"
+- taint key is  "sku".
+- taint value is "generalvm"
+- nodeSelector - the label is agentpool with a value of customgen
 
 
-**Namespace creation and strimzi operator deploying using Helm**
+**1. Namespace creation and strimzi operator deploying using Helm**
 
 ```
 kubectl create namespace kafka-dev
@@ -43,13 +44,14 @@ helm repo add strimzi https://strimzi.io/charts/
 helm repo update
 ```
 
-**Deploy strimzi-operator (it will watch dev and qa namespaces)**
+**2. Deploy strimzi-operator (it will watch dev and qa namespaces)**
 
 ```
 helm install strimzi-operator  strimzi/strimzi-kafka-operator --namespace strimzi --set watchNamespaces="{kafka-dev,kafka-qa}" -f values.yaml
 ```
 
-Deploy Kafka and related apps in kafka-dev namespace
+
+**3. Deploy Kafka and related apps in kafka-dev namespace**
 
 ```
 kubectl create -f kafka-zookeeper.yml -n kafka-dev
@@ -67,7 +69,8 @@ kubectl create -f  kafdrop-service.yml -n kafka-dev
 - We can use ingress for kafdrop 
 
 
-**Build Docker image for kafka debezium connect**
+**4. Build Docker image for kafka debezium connect**
+
 
 - In this setup used Azure MS Sql database. So used debezium-connector-sqlserver plugin
 
@@ -112,6 +115,8 @@ debezium-connector-sqlserver
 
 - Create a Docker file and build. Then push to a private or public repository according to your requirement. 
 
+- Dockerfile content
+
 ```
 Docker file
 
@@ -122,9 +127,11 @@ COPY ./sqljar/ /opt/kafka/plugins/
 USER 1001
 ```
 
-**Build and push strimzi Kafkaconenct image with needed libraries and plugins**
 
-- Here pushed image to Azure container registry
+**5. Build and push strimzi Kafkaconenct image with needed libraries and plugins**
+
+
+- Pushed image to Azure container registry in this environment (you can use any registry)
 
 ```
 docker build -t strimzi-kafka-connect-av:0.35.1-kafka-3.4.0 .
@@ -141,9 +148,11 @@ docker push xxxxxxxxxxxxxxxxxxxxxx.azurecr.io/debezium/strimzi/strimzi-kafka-con
 ```
 
 
-**deploy debezium kafka connect**
+**6. deploy debezium kafka connect**
+
 
 Here we create kafka connect without ( strimzi.io/use-connector-resources: "true" ) annotations. So we can use Kafka Connect REST API
+
 
 ```
 kubectl create -f kafka-debezium-connect.yml -n kafka-dev
@@ -169,13 +178,13 @@ Setting use-connector-resources to true enables KafkaConnectors to create, delet
 If use-connector-resources is enabled in your KafkaConnect configuration, you must use the KafkaConnector resource to define and manage connectors
 
 
-**Create Debezium Kafka connector using Rest API**
+**7. Create Debezium Kafka connector using Rest API**
 
 - The Kafka Connect REST API is available as a service running on <connect_cluster_name>-connect-api:8083
 
 we can use private ingress for  Connect REST API 
 
-- Create connector
+- cURL command to create connector
 
 ```
 curl --location --request POST 'http://debezium-connect-cluster-connect-api:8083/connectors' \
@@ -202,11 +211,15 @@ curl --location --request POST 'http://debezium-connect-cluster-connect-api:8083
 ```
 
 
-**Create connector using KafkaConnector resource**
+# Another way to create KafkaConnector
+
+**1. Create connector using KafkaConnector resource**
 
 If you do not want to create connectors using Rest API create them using KafkaConnector resource
 
 -  enable strimzi.io/use-connector-resources: "true"
+
+- YAML content to create connector using KafkaConnector resource
 
 ```
 apiVersion: kafka.strimzi.io/v1beta2
@@ -297,7 +310,10 @@ spec:
                   - customgen
 ```
 
-**Similar to dev environment we can deploy QA in qa namespace**
+
+# Deploy QA environment
+
+**1. Similar to dev environment we can deploy QA in qa namespace**
 
 Eg:
 
@@ -312,31 +328,75 @@ kubectl create -f  kafdrop-deployment.yml -n kafka-qa
 
 kubectl create -f  kafdrop-service.yml -n kafka-qa
 
-.........
+kubectl create -f kafka-debezium-connect.yml -n kafka-qa
+
+.........  Create connector using REST API or Kafkaconenct resource (Follow above guide)
 
 ```
 
-For ingress setup
 
-Azure - https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
+# check deployed pods and services
+
+- you will see something similar below
+
+```
+kubectl get pods,svc -n kafka-qa -o wide
+NAME                                                    READY   STATUS    RESTARTS   AGE    IP             NODE                                NOMINATED NODE   READINESS GATES
+pod/debezium-cluster-entity-operator-6c545f48dc-vzfr6   3/3     Running   0          103m   10.10.16.140   aks-customgen-33281223-vmss000001   <none>           <none>
+pod/debezium-cluster-kafka-0                            1/1     Running   0          103m   10.10.16.128   aks-customgen-33281223-vmss000001   <none>           <none>
+pod/debezium-cluster-kafka-1                            1/1     Running   0          103m   10.10.16.136   aks-customgen-33281223-vmss000001   <none>           <none>
+pod/debezium-cluster-kafka-2                            1/1     Running   0          103m   10.10.16.38    aks-customgen-33281223-vmss000000   <none>           <none>
+pod/debezium-cluster-zookeeper-0                        1/1     Running   0          104m   10.10.16.113   aks-customgen-33281223-vmss000001   <none>           <none>
+pod/debezium-cluster-zookeeper-1                        1/1     Running   0          104m   10.10.16.35    aks-customgen-33281223-vmss000000   <none>           <none>
+pod/debezium-cluster-zookeeper-2                        1/1     Running   0          104m   10.10.16.107   aks-customgen-33281223-vmss000001   <none>           <none>
+pod/debezium-connect-cluster-connect-796f74cd79-cm766   1/1     Running   0          96m    10.10.16.87    aks-customgen-33281223-vmss000000   <none>           <none>
+pod/kafka-kafdrop-deployment-57895c74cd-rb9sn           1/1     Running   0          53m    10.10.16.91    aks-customgen-33281223-vmss000000   <none>           <none>
+pod/schema-registry-8468c4b65c-kczsf                    1/1     Running   0          61m    10.10.16.61    aks-customgen-33281223-vmss000000   <none>           <none>
+pod/strimzi-cluster-operator-889bd964f-75tm9            1/1     Running   0          25h    10.10.16.85    aks-customgen-33281223-vmss000000   <none>           <none>
+
+NAME                                                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                               AGE    SELECTOR
+service/debezium-cluster-kafka-0                    NodePort    10.0.81.168    <none>        9094:31721/TCP                        103m   statefulset.kubernetes.io/pod-name=debezium-cluster-kafka-0,strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-kafka
+service/debezium-cluster-kafka-1                    NodePort    10.0.101.140   <none>        9094:30077/TCP                        103m   statefulset.kubernetes.io/pod-name=debezium-cluster-kafka-1,strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-kafka
+service/debezium-cluster-kafka-2                    NodePort    10.0.147.58    <none>        9094:31149/TCP                        103m   statefulset.kubernetes.io/pod-name=debezium-cluster-kafka-2,strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-kafka
+service/debezium-cluster-kafka-bootstrap            ClusterIP   10.0.125.50    <none>        9091/TCP,9092/TCP,9093/TCP            103m   strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-kafka
+service/debezium-cluster-kafka-brokers              ClusterIP   None           <none>        9090/TCP,9091/TCP,9092/TCP,9093/TCP   103m   strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-kafka
+service/debezium-cluster-kafka-external-bootstrap   NodePort    10.0.5.118     <none>        9094:32211/TCP                        103m   strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-kafka
+service/debezium-cluster-zookeeper-client           ClusterIP   10.0.93.147    <none>        2181/TCP                              104m   strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-zookeeper
+service/debezium-cluster-zookeeper-nodes            ClusterIP   None           <none>        2181/TCP,2888/TCP,3888/TCP            104m   strimzi.io/cluster=debezium-cluster,strimzi.io/kind=Kafka,strimzi.io/name=debezium-cluster-zookeeper
+service/debezium-connect-cluster-connect-api        ClusterIP   10.0.252.178   <none>        8083/TCP                              96m    strimzi.io/cluster=debezium-connect-cluster,strimzi.io/kind=KafkaConnect,strimzi.io/name=debezium-connect-cluster-connect
+service/kafka-kafdrop-service                       NodePort    10.0.229.70    <none>        9000:31400/TCP                        13m    app=kafka-kafdrop
+service/schema-registry                             ClusterIP   10.0.96.174    <none>        8081/TCP                              100m   app=schema-registry
+```
+
+# For ingress setup
+
+**1. ingress controller**
+
+- For Azure - https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
+
+- Follow releveant guides for AWS , GCP 
 
 
-**Nginx ingress resource with basic auth**
+**2. Nginx ingress resource with basic auth**
 
 
-- Create auth password for user
+- i. Create auth password for user
 
 ```
 htpasswd -c auth inspire
 ```
 
-- Create secret
+- ii. Create secret
 
 ```
 kubectl create secret generic basic-auth --from-file=auth -n kafka-dev
 ```
+- iii. Map Domain name for ingress IP
 
-Eg:-
+
+- iv Create Ingress resource
+
+- YAML file for Ingress resource
 
 ```
 apiVersion: networking.k8s.io/v1
@@ -381,11 +441,6 @@ spec:
                   number: 9000
 ```
  
-
-
-
-
-
-Ref : 
+ Ref : 
 - https://strimzi.io/docs/operators/latest/overview
 - https://debezium.io/documentation/reference/2.4/tutorial.html
