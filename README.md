@@ -210,7 +210,7 @@ curl --location --request POST 'http://debezium-connect-cluster-connect-api:8083
 ```
 
 
-# Another way to create KafkaConnector
+## Another way to create KafkaConnector
 
 **1. Create KafkaConnect first**
 
@@ -312,7 +312,7 @@ spec:
 ```
 
 
-# Deploy QA environment
+## Deploy QA environment
 
 **1. Similar to dev environment we can deploy QA in qa namespace**
 
@@ -336,7 +336,7 @@ kubectl create -f kafka-debezium-connect.yml -n kafka-qa
 ```
 
 
-# check deployed pods and services
+## check deployed pods and services
 
 - you will see something similar below
 
@@ -369,7 +369,7 @@ service/kafka-kafdrop-service                       NodePort    10.0.229.70    <
 service/schema-registry                             ClusterIP   10.0.96.174    <none>        8081/TCP                              100m   app=schema-registry
 ```
 
-# For ingress setup
+## For ingress setup
 
 **1. ingress controller**
 
@@ -442,7 +442,7 @@ spec:
                   number: 90001
 ```
  
-# Enable CDC in Azure SQL DB
+## Enable CDC in Azure SQL DB
 
 - SQL command to enable CDC
 
