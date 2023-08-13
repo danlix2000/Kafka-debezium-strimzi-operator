@@ -73,6 +73,31 @@ kubectl create -f  kafdrop-service.yml -n kafka-dev
 
 - First, Download jar files  and save
 
+Eg:-
+
+```
+https://repo1.maven.org/maven2/io/debezium/debezium-connector-sqlserver/1.9.7.Final/debezium-connector-sqlserver-1.9.7.Final-plugin.zip
+
+https://repo1.maven.org/maven2/org/apache/avro/avro/1.10.1/avro-1.10.1.jar
+
+https://packages.confluent.io/maven/io/confluent/kafka-connect-avro-converter/6.2.0/kafka-connect-avro-converter-6.2.0.jar
+
+https://packages.confluent.io/maven/io/confluent/kafka-connect-avro-data/6.2.0/kafka-connect-avro-data-6.2.0.jar
+
+https://packages.confluent.io/maven/io/confluent/kafka-avro-serializer/6.2.0/kafka-avro-serializer-6.2.0.jar
+
+https://packages.confluent.io/maven/io/confluent/kafka-schema-serializer/6.2.0/kafka-schema-serializer-6.2.0.jar
+
+https://packages.confluent.io/maven/io/confluent/kafka-schema-registry-client/6.2.0/kafka-schema-registry-client-6.2.0.jar
+
+https://packages.confluent.io/maven/io/confluent/common-config/6.2.0/common-config-6.2.0.jar
+
+https://packages.confluent.io/maven/io/confluent/common-utils/6.2.0/common-utils-6.2.0.jar
+
+
+
+```
+
 Eg:- 
 
 ```
