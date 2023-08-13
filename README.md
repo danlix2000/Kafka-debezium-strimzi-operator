@@ -20,7 +20,12 @@ This environment is deployed in a specific node pool
 
 So we used
 
- - Taints and Tolerations ,nodeAffinity , nodeSelector to deploy all Strimzi operators and Kafka & all other related apps in node pool.
+- Taints and Tolerations ,nodeAffinity , nodeSelector to deploy all Strimzi operators and Kafka & all other related apps in node pool.
+
+In this environemnt
+
+taint key is  "sku".
+taint value is "generalvm"
 
 
 **Namespace creation and strimzi operator deploying using Helm**
