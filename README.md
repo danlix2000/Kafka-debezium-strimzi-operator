@@ -211,7 +211,7 @@ spec:
                   - customgen
  ```
 
- - create KafkaConnector yml file and apply
+**Create KafkaConnector yml file and apply**
 
  ```
  apiVersion: kafka.strimzi.io/v1beta2
@@ -257,9 +257,11 @@ spec:
 
  ```
 
+
 **Similar to dev environment we can deploy QA in qa namespace**
 
 Eg:
+
  ```
 kubectl create -f kafka-zookeeper.yml -n kafka-qa
 
