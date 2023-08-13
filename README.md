@@ -264,7 +264,7 @@ spec:
 
 **2. Create KafkaConnector yml file and apply**
 
-Eg : kubectl create -f  kafkaconnector.yml -n kafka-dev
+Eg : kubectl create -f  kafka-connector.yml -n kafka-dev
 
 - YAML definition for KafkaConnector
 
