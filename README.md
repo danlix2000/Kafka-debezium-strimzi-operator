@@ -316,6 +316,76 @@ kubectl create -f  kafdrop-service.yml -n kafka-qa
 
 ```
 
+For ingress setup
+
+Azure - https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
+
+
+**Nginx ingress resource with basic auth**
+
+
+- Create auth password for user
+
+```
+htpasswd -c auth inspire
+```
+
+- Create secret
+
+```
+kubectl create secret generic basic-auth --from-file=auth -n kafka-dev
+```
+
+Eg:-
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inspire-kafka-ing
+  namespace: kafka-dev
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - xxxx-debezium-connect-api-dev.non-prod.internal-xxxx.com
+        - xxxxx-kafdrop-dev.non-prod.internal-xxxxx.com
+       
+      secretName: dev-kafka-tls
+  ingressClassName: nginx
+  rules:
+    - host: xxxxx-debezium-connect-api-dev.non-prod.internal-xxxx.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: debezium-connect-cluster-connect-api
+                port:
+                  number: 8083
+    - host: xxxx-kafdrop-dev.non-prod.internal-xxxxx.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kafka-kafdrop-service
+                port:
+                  number: 9000
+```
+ 
+
+
+
+
+
 Ref : 
 - https://strimzi.io/docs/operators/latest/overview
 - https://debezium.io/documentation/reference/2.4/tutorial.html
