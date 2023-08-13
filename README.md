@@ -170,7 +170,7 @@ If you do not want to create connectors using Rest API create them using KafkaCo
 
 -  enable strimzi.io/use-connector-resources: "true"
 
-```
+
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
 metadata:
@@ -209,4 +209,3 @@ spec:
                   operator: In
                   values:
                   - customgen
- ```
