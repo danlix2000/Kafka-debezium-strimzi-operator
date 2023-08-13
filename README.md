@@ -7,6 +7,12 @@ Kafka , debezium connet and releted serices will deploy in below namespaces
 - QA env  namespace - kafka-qa
 
 
+This environment is deploy in specific node pool
+
+So we use 
+
+ - Taints and Tolerations ,nodeAffinity , nodeSelector to deploy all Strimzi operator and Kafka & all other releted apps in nodepool.
+
 
 **Namespace creation and strimzi operator deploying using Helm**
 
@@ -158,4 +164,96 @@ curl --location --request POST 'http://debezium-connect-cluster-connect-api:8083
 ```
 
 
-Create 
+**Create connector using KafkaConnector resource**
+
+If you do not want to create conenctors using Rest API create using KafkaConnector resource
+
+-  enable strimzi.io/use-connector-resources: "true"
+
+```
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: debezium-connect-cluster
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.3.1
+  image: xxxxxxxxxxxxx.azurecr.io/debezium/strimzi/strimzi-kafka-connect-av:0.35.1-kafka-3.4.0 # update Container repo and image
+  replicas: 1
+  bootstrapServers: debezium-cluster-kafka-bootstrap:9092
+  config:
+    config.providers: secrets
+    config.providers.secrets.class: io.strimzi.kafka.KubernetesSecretConfigProvider
+    group.id: connect-cluster
+    offset.storage.topic: connect-cluster-offsets
+    config.storage.topic: connect-cluster-configs
+    status.storage.topic: connect-cluster-status
+    # -1 means it will use the default replication factor configured in the broker
+    config.storage.replication.factor: -1
+    offset.storage.replication.factor: -1
+    status.storage.replication.factor: -1
+  template:
+      pod:
+        tolerations:
+          - key: "sku"
+            operator: "Equal"
+            value: "generalvm"
+            effect: "NoSchedule"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: agentpool
+                  operator: In
+                  values:
+                  - customgen
+ ```
+
+ - create KafkaConnector yml file and apply
+
+ ```
+ apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mssql-azure-sql-connector
+  namespace: kafka-dev
+  labels:
+    strimzi.io/cluster: debezium-connect-cluster
+spec:
+  class: io.debezium.connector.sqlserver.SqlServerConnector
+  tasksMax: 1
+  config:
+    database.hostname: xxxxxxxxxxxxxxxx.database.windows.net
+    database.port: 1433
+    database.user: dbzqausr
+    database.password: xxxxxxxxxxxxxxxx
+    database.dbname: dbztest
+    database.server.name: xxxxxxxxxxxx-sql01
+    table.include.list: dbo.MEMBER_POINT
+    database.history.kafka.bootstrap.servers: debezium-cluster-kafka-bootstrap:9092
+    database.history.kafka.topic: event.MEMBER_POINT
+    key.converter: io.confluent.connect.avro.AvroConverter
+    key.converter.schema.registry.url: http://schema-registry:8081
+    value.converter: io.confluent.connect.avro.AvroConverter
+    value.converter.schema.registry.url: http://schema-registry:8081
+  template:
+      pod:
+        tolerations:
+          - key: "sku"
+            operator: "Equal"
+            value: "generalvm"
+            effect: "NoSchedule"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: agentpool
+                  operator: In
+                  values:
+                  - customgen
+
+ ```
+
