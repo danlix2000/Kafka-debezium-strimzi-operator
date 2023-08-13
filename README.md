@@ -442,6 +442,37 @@ spec:
                   number: 90001
 ```
  
+ ## Create Kafka connector using API with basic auth
+
+- cURL contents
+
+Eg:- 
+
+```
+curl --location --request POST 'http://debezium-connect-cluster-connect-api:8083/connectors' \
+-u devusr:1Sk39F79BRFD \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "mssql-dbz-mssql-connector",
+    "config": {
+        "connector.class": "io.debezium.connector.sqlserver.SqlServerConnector",
+        "database.hostname": "xxxxxxxxxxxxxxxx.database.windows.net",
+        "database.port": "1433",
+        "database.user": "dbzqausr",
+        "database.password": "xxxxxxxxxxxxxxxxxxxxx",
+        "database.dbname": "ztest",
+        "database.server.name": "xxxxxxxxxxxx.database.windows.net",
+        "table.include.list": "dbo.MEMBER_POINT",
+        "database.history.kafka.bootstrap.servers": "debezium-cluster-kafka-bootstrap:9092",
+        "database.history.kafka.topic": "actions.MEMBER_POINT",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "key.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schema.registry.url": "http://schema-registry:8081",
+        "key.converter.schema.registry.url": "http://schema-registry:8081"
+    }
+}'
+```
+
 ## Enable CDC in Azure SQL DB
 
 - SQL command to enable CDC
