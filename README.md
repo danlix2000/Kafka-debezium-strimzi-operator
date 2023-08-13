@@ -373,7 +373,7 @@ service/schema-registry                             ClusterIP   10.0.96.174    <
 
 **1. ingress controller**
 
-- For Azure - https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
+- For Azure - [Azure Ingress controller](https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli "Azure Ingress controller")
 
 - Follow releveant guides for AWS , GCP 
 
@@ -491,6 +491,8 @@ kubectl logs -f debezium-connect-cluster-connect-796f74cd79-cm766  -n kafka-dev
 ```
 
 
- Ref : 
-- https://strimzi.io/docs/operators/latest/overview
-- https://debezium.io/documentation/reference/2.4/tutorial.html
+ *Ref :*
+
+- [Strimzi Operator Documentation](https://strimzi.io/docs/operators/latest/overview "Strimzi Operator Documentation")
+
+- [Debezium Documentation](https://debezium.io/documentation/reference/2.4/tutorial.html "Debezium Documentation")
