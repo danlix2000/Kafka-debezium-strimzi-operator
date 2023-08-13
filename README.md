@@ -336,7 +336,7 @@ kubectl create -f kafka-debezium-connect.yml -n kafka-qa
 ```
 
 
-## check deployed pods and services
+## Check deployed pods and services
 
 - you will see something similar below
 
@@ -479,7 +479,7 @@ EXEC sys.sp_cdc_enable_table
   @supports_net_changes = 1;
 ```
 
-## check and verify 
+## Check and verify 
 
 - Update CDC enabled table and check on kafdrop (Kafka Topic)
 - check debezium-connect pod logs
