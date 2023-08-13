@@ -28,6 +28,7 @@ In this environemnt
 - taint value is "generalvm"
 - nodeSelector - the label is agentpool with a value of customgen
 
+## This deployed and tested on AKS
 
 **1. Namespace creation and strimzi operator deploying using Helm**
 
@@ -438,9 +439,58 @@ spec:
               service:
                 name: kafka-kafdrop-service
                 port:
-                  number: 9000
+                  number: 90001
 ```
  
+# Enable CDC in Azure SQL DB
+
+- SQL command to enable CDC
+
+```
+USE dbztest;
+ 
+
+-- Enable CDC for the database
+ 
+
+EXEC sys.sp_cdc_enable_db;
+
+
+#############
+
+USE dbztest;
+
+
+-- Enable CDC for the table
+  
+
+EXEC sys.sp_cdc_enable_table
+ 
+
+  @source_schema = 'dbo',
+
+ 
+  @source_name = 'MEMBER_POINT',
+ 
+
+  @role_name = 'cdc_admin',
+
+ 
+  @supports_net_changes = 1;
+```
+
+## check and verify 
+
+- Update CDC enable table and check on kafdrop 
+- check debezium-connect pod logs
+
+Eg:- 
+
+```
+kubectl logs -f debezium-connect-cluster-connect-796f74cd79-cm766  -n kafka-dev
+```
+
+
  Ref : 
 - https://strimzi.io/docs/operators/latest/overview
 - https://debezium.io/documentation/reference/2.4/tutorial.html
