@@ -211,7 +211,7 @@ curl --location --request POST 'http://debezium-connect-cluster-connect-api:8083
 
 # Another way to create KafkaConnector
 
-**1. Create connector using KafkaConnector resource**
+**1. Create KafkaConnect first**
 
 If you do not want to create connectors using Rest API create them using KafkaConnector resource
 
@@ -261,9 +261,11 @@ spec:
 ```
 
 
-**Create KafkaConnector yml file and apply**
+**2. Create KafkaConnector yml file and apply**
 
 Eg : kubectl create -f  kafkaconnector.yml -n kafka-dev
+
+- YAML definition for KafkaConnector
 
 ```
 apiVersion: kafka.strimzi.io/v1beta2
@@ -328,7 +330,7 @@ kubectl create -f  kafdrop-service.yml -n kafka-qa
 
 kubectl create -f kafka-debezium-connect.yml -n kafka-qa
 
-.........  Create connector using REST API or Kafkaconenct resource (Follow above guide)
+.........  Create connector using REST API or KafkaConnector resource (Follow above guide)
 
 ```
 
