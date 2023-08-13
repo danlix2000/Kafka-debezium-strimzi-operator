@@ -29,7 +29,7 @@ In this environemnt
 - nodeSelector - the label is agentpool with a value of customgen
 
 
-**Namespace creation and strimzi operator deploying using Helm**
+**1. Namespace creation and strimzi operator deploying using Helm**
 
 ```
 kubectl create namespace kafka-dev
@@ -44,13 +44,14 @@ helm repo add strimzi https://strimzi.io/charts/
 helm repo update
 ```
 
-**Deploy strimzi-operator (it will watch dev and qa namespaces)**
+**2. Deploy strimzi-operator (it will watch dev and qa namespaces)**
 
 ```
 helm install strimzi-operator  strimzi/strimzi-kafka-operator --namespace strimzi --set watchNamespaces="{kafka-dev,kafka-qa}" -f values.yaml
 ```
 
-Deploy Kafka and related apps in kafka-dev namespace
+
+**3. Deploy Kafka and related apps in kafka-dev namespace**
 
 ```
 kubectl create -f kafka-zookeeper.yml -n kafka-dev
@@ -68,7 +69,8 @@ kubectl create -f  kafdrop-service.yml -n kafka-dev
 - We can use ingress for kafdrop 
 
 
-**Build Docker image for kafka debezium connect**
+**4. Build Docker image for kafka debezium connect**
+
 
 - In this setup used Azure MS Sql database. So used debezium-connector-sqlserver plugin
 
@@ -125,7 +127,9 @@ COPY ./sqljar/ /opt/kafka/plugins/
 USER 1001
 ```
 
-**Build and push strimzi Kafkaconenct image with needed libraries and plugins**
+
+**5. Build and push strimzi Kafkaconenct image with needed libraries and plugins**
+
 
 - Pushed image to Azure container registry in this environment (you can use any registry)
 
@@ -144,9 +148,11 @@ docker push xxxxxxxxxxxxxxxxxxxxxx.azurecr.io/debezium/strimzi/strimzi-kafka-con
 ```
 
 
-**deploy debezium kafka connect**
+**6. deploy debezium kafka connect**
+
 
 Here we create kafka connect without ( strimzi.io/use-connector-resources: "true" ) annotations. So we can use Kafka Connect REST API
+
 
 ```
 kubectl create -f kafka-debezium-connect.yml -n kafka-dev
@@ -172,7 +178,7 @@ Setting use-connector-resources to true enables KafkaConnectors to create, delet
 If use-connector-resources is enabled in your KafkaConnect configuration, you must use the KafkaConnector resource to define and manage connectors
 
 
-**Create Debezium Kafka connector using Rest API**
+**7. Create Debezium Kafka connector using Rest API**
 
 - The Kafka Connect REST API is available as a service running on <connect_cluster_name>-connect-api:8083
 
@@ -205,7 +211,9 @@ curl --location --request POST 'http://debezium-connect-cluster-connect-api:8083
 ```
 
 
-**Create connector using KafkaConnector resource**
+# Another way to create KafkaConnector
+
+**1. Create connector using KafkaConnector resource**
 
 If you do not want to create connectors using Rest API create them using KafkaConnector resource
 
@@ -302,7 +310,10 @@ spec:
                   - customgen
 ```
 
-**Similar to dev environment we can deploy QA in qa namespace**
+
+# Deploy QA environment
+
+**1. Similar to dev environment we can deploy QA in qa namespace**
 
 Eg:
 
@@ -316,13 +327,17 @@ kubectl create -f schema-registry-service.yml -n kafka-qa
 kubectl create -f  kafdrop-deployment.yml -n kafka-qa
 
 kubectl create -f  kafdrop-service.yml -n kafka-qa
-.........
+
+kubectl create -f kafka-debezium-connect.yml -n kafka-qa
+
+.........  Create connector using REST API or Kafkaconenct resource (Follow above guide)
 
 ```
 
-**check deployed pods and services**
 
-- you will see sommething similar to below
+# check deployed pods and services
+
+- you will see something similar below
 
 ```
 kubectl get pods,svc -n kafka-qa -o wide
@@ -355,25 +370,33 @@ service/schema-registry                             ClusterIP   10.0.96.174    <
 
 # For ingress setup
 
-Azure - https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
+**1. ingress controller**
+
+- For Azure - https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli
+
+- Follow releveant guides for AWS , GCP 
 
 
-**Nginx ingress resource with basic auth**
+**2. Nginx ingress resource with basic auth**
 
 
-- Create auth password for user
+- i. Create auth password for user
 
 ```
 htpasswd -c auth inspire
 ```
 
-- Create secret
+- ii. Create secret
 
 ```
 kubectl create secret generic basic-auth --from-file=auth -n kafka-dev
 ```
+- iii. Map Domain name for ingress IP
 
-Eg:-
+
+- iv Create Ingress resource
+
+- YAML file for Ingress resource
 
 ```
 apiVersion: networking.k8s.io/v1
@@ -418,7 +441,6 @@ spec:
                   number: 9000
 ```
  
-
-Ref : 
+ Ref : 
 - https://strimzi.io/docs/operators/latest/overview
 - https://debezium.io/documentation/reference/2.4/tutorial.html
