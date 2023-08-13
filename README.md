@@ -64,7 +64,7 @@ kubectl create -f  kafdrop-service.yml -n kafka-dev
 
 ```
 
-- we can use ingress for kafdrop 
+- We can use ingress for kafdrop 
 
 
 **Build Docker image for kafka debezium connect**
@@ -93,8 +93,6 @@ https://packages.confluent.io/maven/io/confluent/kafka-schema-registry-client/6.
 https://packages.confluent.io/maven/io/confluent/common-config/6.2.0/common-config-6.2.0.jar
 
 https://packages.confluent.io/maven/io/confluent/common-utils/6.2.0/common-utils-6.2.0.jar
-
-
 
 ```
 
