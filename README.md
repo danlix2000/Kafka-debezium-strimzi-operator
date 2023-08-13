@@ -481,7 +481,7 @@ EXEC sys.sp_cdc_enable_table
 
 ## check and verify 
 
-- Update CDC enable table and check on kafdrop 
+- Update CDC enabled table and check on kafdrop (Kafka Topic)
 - check debezium-connect pod logs
 
 Eg:- 
