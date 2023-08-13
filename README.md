@@ -22,7 +22,7 @@ So we used
 
 - Taints and Tolerations ,nodeAffinity , nodeSelector to deploy all Strimzi operators and Kafka & all other related apps in node pool.
 
-In this environemnt
+In this environment
 
 - taint key is  "sku".
 - taint value is "generalvm"
