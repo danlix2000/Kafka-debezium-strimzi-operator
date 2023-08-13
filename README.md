@@ -6,6 +6,15 @@ Kafka , debezium connect and related services will deploy in the below namespace
 
 - QA env  namespace - kafka-qa
 
+**Below apps going to use and deploy below apps/plugins/dependencies**
+
+- Strimzi operator
+- Kafka With ZooKeeper
+- Confluent Schema Registry
+- Kafdrop - web UI for viewing Kafka
+- Debezium and relevent dependencies 
+- Avro converter and relevent dependencies
+
 
 This environment is deployed in a specific node pool
 
@@ -50,6 +59,7 @@ kubectl create -f  kafdrop-service.yml -n kafka-dev
 
 ```
 
+- we can use ingress for kafdrop 
 
 
 **Build Docker image for kafka debezium connect**
@@ -135,7 +145,7 @@ If use-connector-resources is enabled in your KafkaConnect configuration, you mu
 
 - The Kafka Connect REST API is available as a service running on <connect_cluster_name>-connect-api:8083
 
-we can expose Connect REST API as a private ingress etc.
+we can use private ingress for  Connect REST API 
 
 - Create connector
 
@@ -277,3 +287,7 @@ kubectl create -f  kafdrop-service.yml -n kafka-qa
 .........
 
 ```
+
+Ref : 
+- https://strimzi.io/docs/operators/latest/overview
+- https://debezium.io/documentation/reference/2.4/tutorial.html
