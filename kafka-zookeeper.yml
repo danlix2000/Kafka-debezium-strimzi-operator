@@ -1,0 +1,93 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: debezium-cluster
+  namespace: kafka-dev
+spec:
+  kafka:
+    replicas: 3
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+        authentication:
+          type: tls
+      - name: external
+        port: 9094
+        type: nodeport
+        tls: false
+    storage:
+      type: jbod
+      volumes:
+      - id: 0
+        type: persistent-claim
+        size: 100Gi
+        deleteClaim: false
+    template:
+      pod:
+        tolerations:
+          - key: "sku"
+            operator: "Equal"
+            value: "generalvm"
+            effect: "NoSchedule"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: agentpool
+                  operator: In
+                  values:
+                  - customgen
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 1
+      default.replication.factor: 3
+      min.insync.replicas: 1
+  zookeeper:
+    replicas: 3
+    storage:
+      type: persistent-claim
+      size: 100Gi
+      deleteClaim: false
+    template:
+      pod:
+        tolerations:
+          - key: "sku"
+            operator: "Equal"
+            value: "generalvm"
+            effect: "NoSchedule"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: agentpool
+                  operator: In
+                  values:
+                  - customgen
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+    template:
+      pod:
+        tolerations:
+          - key: "sku"
+            operator: "Equal"
+            value: "generalvm"
+            effect: "NoSchedule"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: agentpool
+                  operator: In
+                  values:
+                  - customgen

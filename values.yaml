@@ -1,0 +1,9 @@
+nodeSelector:
+  agentpool: customgen
+
+tolerations:
+- key: "sku"
+  operator: "Equal"
+  value: "generalvm"
+  effect: "NoSchedule"
+
